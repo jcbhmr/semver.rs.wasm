@@ -1,0 +1,54 @@
+resource build-metadata {
+  as-str: func() -> string
+  is-empty: func() -> bool
+}
+build-metadata-empty: func() -> build-metadata
+build-metadata-new: func(text: string) -> expected<build-metadata, error>
+
+record comparator {
+  op: op,
+  major: u64,
+  minor: option<u64>,
+  patch: option<u64>,
+  pre: prerelease,
+}
+comparator-parse: func(text: string) -> expected<comparator, error>
+comparator-matches: func(self: comparator, version: version) -> bool
+
+resource error {}
+
+resource prerelease {
+  as-str: func() -> string
+  is-empty: func() -> bool
+}
+prerelease-empty: func() -> prerelease
+prerelease-new: func(text: string) -> expected<prerelease, error>
+
+record version {
+  major: u64,
+  minor: u64,
+  patch: u64,
+  pre: prerelease,
+  build: build-metadata,
+}
+version-new: func(major: u64, minor: u64, patch: u64) -> version
+version-parse: func(text: string) -> expected<version, error>
+version-cmp-precedence: func(a: version, b: version) -> s8
+
+record version-req {
+  comparators: list<comparator>,
+}
+version-req-star: func() -> version-req
+version-req-parse: func(text: string) -> expected<version-req, error>
+version-req-matches: func(self: version-req, version: version) -> bool
+
+enum op {
+  exact,
+  greater,
+  greater-eq,
+  less,
+  less-eq,
+  tilde,
+  caret,
+  wildcard,
+}
